@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- EDIT: search-result and link-preview text. Keep description under ~155 characters. -->
+<meta name="description" content="Aleksandr Ivanov — security operations, cloud security and networking. Home-lab projects and detections, written up in full.">
+<link rel="canonical" href="https://aleksandrivanov.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aleksandr Ivanov — Security Operations &amp; Cloud Security">
+<meta property="og:description" content="Security operations, cloud security and networking. Home-lab projects and detections, written up in full.">
+<meta property="og:url" content="https://aleksandrivanov.com/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='3' fill='%230969DA'/%3E%3Ccircle cx='7' cy='9' r='1.6' fill='%231F2328'/%3E%3Ccircle cx='25' cy='23' r='1.6' fill='%231F2328'/%3E%3Ccircle cx='24' cy='7' r='1.2' fill='%231F2328'/%3E%3Ccircle cx='8' cy='24' r='1.2' fill='%231F2328'/%3E%3C/svg%3E">
+
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+</style>
+<title>Aleksandr Ivanov — Security Operations &amp; Cloud Security</title>
+
+<script>
+  /* Runs before the stylesheet and content parse, so a restored theme never flashes
+     the wrong colours. Storage can throw in private windows — never let that break the page. */
+  (function () {
+    try {
+      var v = localStorage.getItem('theme');
+      if (v === 'dark' || v === 'light') document.documentElement.setAttribute('data-theme', v);
+    } catch (e) {}
+  })();
+</script>
+
+<style>
+  /* ============================================================
+     DESIGN PLAN
+     Concept : Kim-style night-sky hero — a 3D star cluster the
+               user can spin (hover-tilt on desktop, drag on touch),
+               with section labels riding real stars. Brittany's
+               scannable single-page IA below it.
+     Color   : GitHub's real tokens. Accent blue for structure,
+               GitHub semantic colors as the severity ramp. Both
+               hero and content follow the light/dark theme.
+     Type    : mono for every piece of apparatus (chrome, labels,
+               tags, data, tables); sans for headings and prose.
+     Layout  : full-height canvas hero -> sticky identity rail +
+               scrolling content. Rail stacks under 1000px. Under
+               760px labels pin to anchor stars + drag-to-spin;
+               reduced-motion renders one static frame.
+     Note    : this is a single-file PREVIEW. The production site
+               is Astro (per-page templates + Markdown content).
+     ============================================================ */
+
+  :root {
+    /* hero — themed. light baseline */
+    --hero-bg:    #F4F6F8;
+    --hero-ink:   31, 35, 40;      /* rgb of stars + mesh */
+    --hero-star:  #1F2328;
+    --hero-text:  #1F2328;
+    --hero-dim:   #59636E;
+    --hero-hair:  #D1D9E0;
+
+    /* content — light baseline (GitHub light) */
+    --canvas:        #FFFFFF;
+    --surface:       #F6F8FA;
+    --border:        #D1D9E0;
+    --border-strong: #B7BFC7;
+    --text:          #1F2328;
+    --text-2:        #59636E;
+    --text-3:        #818B98;
+    --accent:        #0969DA;
+    --accent-dim:    rgba(9, 105, 218, 0.10);
+    --accent-rgb:    9, 105, 218;
+    --spot:          rgba(8, 12, 18, 0.14);   /* light theme → dark halo */
+
+    --sev-crit: #CF222E;
+    --sev-high: #BC4C00;
+    --sev-med:  #9A6700;
+    --sev-low:  #1A7F37;
+    --sev-info: #6E7781;
+
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --mono: ui-monospace, "JetBrains Mono", "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+    --micro: 0.6875rem;
+    --xs:    0.75rem;
+    --sm:    0.875rem;
+    --base:  1.0625rem;
+    --lg:    1.1875rem;
+    --xl:    1.75rem;
+    --xxl:   clamp(1.9rem, 4.5vw, 2.6rem);
+
+    --rail: 18rem;
+    --measure: 64ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --hero-bg:    #0A0C0E;
+      --hero-ink:   255, 255, 255;
+      --hero-star:  #FFFFFF;
+      --hero-text:  #C9D1D9;
+      --hero-dim:   #6E7681;
+      --hero-hair:  #23282D;
+
+      --canvas:        #0D1117;
+      --surface:       #161B22;
+      --border:        #30363D;
+      --border-strong: #444C56;
+      --text:          #E6EDF3;
+      --text-2:        #9198A1;
+      --text-3:        #6E7681;
+      --accent:        #58A6FF;
+      --accent-dim:    rgba(88, 166, 255, 0.14);
+      --accent-rgb:    88, 166, 255;
+      --spot:          rgba(210, 226, 255, 0.10);   /* dark theme → light halo */
+      --sev-crit: #F85149;
+      --sev-high: #DB6D28;
+      --sev-med:  #D29922;
+      --sev-low:  #3FB950;
+      --sev-info: #6E7681;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --hero-bg:    #F4F6F8;
+    --hero-ink:   31, 35, 40;
+    --hero-star:  #1F2328;
+    --hero-text:  #1F2328;
+    --hero-dim:   #59636E;
+    --hero-hair:  #D1D9E0;
+
+    --canvas:        #FFFFFF;
+    --surface:       #F6F8FA;
+    --border:        #D1D9E0;
+    --border-strong: #B7BFC7;
+    --text:          #1F2328;
+    --text-2:        #59636E;
+    --text-3:        #818B98;
+    --accent:        #0969DA;
+    --accent-dim:    rgba(9, 105, 218, 0.10);
+    --accent-rgb:    9, 105, 218;
+    --spot:          rgba(8, 12, 18, 0.14);   /* light theme → dark halo */
+    --sev-crit: #CF222E;
+    --sev-high: #BC4C00;
+    --sev-med:  #9A6700;
+    --sev-low:  #1A7F37;
+    --sev-info: #6E7781;
+  }
+
+  :root[data-theme="dark"] {
+    --hero-bg:    #0A0C0E;
+    --hero-ink:   255, 255, 255;
+    --hero-star:  #FFFFFF;
+    --hero-text:  #C9D1D9;
+    --hero-dim:   #6E7681;
+    --hero-hair:  #23282D;
+
+    --canvas:        #0D1117;
+    --surface:       #161B22;
+    --border:        #30363D;
+    --border-strong: #444C56;
+    --text:          #E6EDF3;
+    --text-2:        #9198A1;
+    --text-3:        #6E7681;
+    --accent:        #58A6FF;
+    --accent-dim:    rgba(88, 166, 255, 0.14);
+    --accent-rgb:    88, 166, 255;
+    --spot:          rgba(210, 226, 255, 0.10);   /* dark theme → light halo */
+    --sev-crit: #F85149;
+    --sev-high: #DB6D28;
+    --sev-med:  #D29922;
+    --sev-low:  #3FB950;
+    --sev-info: #6E7681;
+  }
+
+  * { box-sizing: border-box; }
+
+  body { background: var(--canvas); }
+
+  /* cursor spotlight — follows the pointer over the content, Brittany-style */
+  #spot {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      600px circle at var(--mx, 50%) var(--my, 50%),
+      var(--spot),
+      transparent 72%
+    );
+  }
+  /* no cursor to follow on touch devices — hide it */
+  @media (hover: none) { #spot { display: none; } }
+  #view-home, #view-writeup { position: relative; z-index: 1; }
+
+  .site {
+    background: transparent;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: var(--base);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 4px;
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-size: var(--micro);
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+
+  /* ==================== HERO ==================== */
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 34rem;
+    background: var(--hero-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    touch-action: pan-y;   /* horizontal drag spins the sky; vertical swipe scrolls and pinch zooms
+                              (was `none`, which also blocked scrolling off the hero and zooming) */
+  }
+
+  #sky {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .chrome {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.6rem 2rem;
+  }
+  .chrome a, .chrome span { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.15em; text-transform: uppercase; }
+  .chrome__name { color: var(--hero-text); white-space: nowrap; }
+  .chrome__mid { margin: 0 auto; display: flex; gap: 1.6rem; }
+  .chrome__mid a { color: var(--hero-dim); text-decoration: none; padding-bottom: 3px; }
+  .chrome__mid a:hover { color: var(--hero-text); }
+  .tog {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--hero-dim); background: none; border: 0;
+    padding: 0; cursor: pointer; line-height: 1;
+  }
+  .tog:hover { color: var(--hero-text); }
+
+  .field { border-bottom: 1px dashed currentColor; opacity: 0.75; }
+
+  /* constellation labels */
+  .sky { position: absolute; inset: 0; z-index: 2; }
+  .lab {
+    position: absolute;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    color: var(--hero-text);
+    transition: color 200ms ease;
+    will-change: transform, opacity;
+  }
+  /* hover-only, so the blue never sticks after a tap on a touchscreen */
+  @media (hover: hover) {
+    .lab:hover { color: var(--accent); }
+  }
+  .lab--xl { font-size: 1.8rem;  letter-spacing: 0.24em; opacity: 0.94; }
+  .lab--l  { font-size: 1.3rem;  letter-spacing: 0.22em; opacity: 0.84; }
+  .lab--m  { font-size: 0.95rem; letter-spacing: 0.2em;  opacity: 0.66; }
+  .lab--s  { font-size: 0.75rem; letter-spacing: 0.18em; opacity: 0.5; }
+  .lab--s:hover, .lab--m:hover { opacity: 1; }
+
+  .hero__foot {
+    position: relative;
+    z-index: 3;
+    margin-top: auto;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.5rem 2rem 2rem;
+    gap: 1.5rem;
+  }
+  .hero__foot .mono { color: var(--hero-dim); }
+  .hero__foot .sp { margin-left: auto; }
+  .cue { color: var(--hero-dim); text-decoration: none; }
+  .cue:hover { color: var(--hero-text); }
+
+  /* ==================== SHELL ==================== */
+  .shell {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: var(--rail) 1fr;
+    gap: 4.5rem;
+  }
+
+  .rail {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.4rem;
+    padding: 3rem 0;
+  }
+  .rail__name { font-size: var(--xxl); line-height: 1.1; letter-spacing: -0.025em; font-weight: 600; margin: 0; }
+  .rail__role { font-family: var(--mono); font-size: var(--xs); letter-spacing: 0.06em; color: var(--accent); margin: 0.4rem 0 0; }
+  .rail__blurb { color: var(--text-2); font-size: var(--sm); margin: 0; max-width: 30ch; }
+  .rail__nav { display: grid; gap: 0.6rem; margin-top: 0.75rem; }
+  .rail__link {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--text-3); text-decoration: none;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .rail__link::before {
+    content: ""; width: 1.5rem; height: 1px;
+    background: var(--border-strong);
+    transition: width 200ms ease, background 200ms ease;
+  }
+  .rail__link:hover { color: var(--text); }
+  .rail__link:hover::before { width: 2.75rem; background: var(--accent); }
+  .rail__soc { display: flex; gap: 1.1rem; margin-top: 1rem; }
+  .rail__soc a { color: var(--text-3); text-decoration: none; }
+  .rail__soc a:hover { color: var(--accent); }
+
+  /* ==================== CONTENT ==================== */
+  .content { padding: 6rem 0 3rem; min-width: 0; }
+  .sec { margin-bottom: 6rem; scroll-margin-top: 1.5rem; }
+  .sec__label { display: flex; align-items: center; gap: 0.9rem; margin: 0 0 1.8rem; color: var(--text-3);
+                font-size: var(--base); font-weight: 400; }   /* an h2 — reset UA heading styles */
+  .sec__label::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+  .sec__h { font-size: var(--xl); font-weight: 600; letter-spacing: -0.02em; margin: 0 0 1.2rem; text-wrap: balance; }
+
+  .prose { max-width: var(--measure); color: var(--text-2); }
+  .prose p { margin: 0 0 1rem; text-wrap: pretty; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--text); font-weight: 600; }
+
+  .eng {
+    display: grid; gap: 0.8rem;
+    padding: 1.4rem 1.5rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  .eng:hover { background: var(--surface); border-color: var(--border); }
+  .eng__head { display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap; }
+  .eng__id { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.12em; color: var(--accent); }
+  .eng__title { font-size: var(--lg); font-weight: 600; letter-spacing: -0.015em; margin: 0; flex: 1 1 16rem; }
+  .eng__sum { margin: 0; color: var(--text-2); font-size: var(--sm); max-width: var(--measure); text-wrap: pretty; }
+
+  .chip {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.16rem 0.55rem; border: 1px solid currentColor;
+    border-radius: 999px; white-space: nowrap; line-height: 1.4;
+  }
+  .chip--wip { color: var(--sev-med); }
+  .chip--plan { color: var(--text-3); }
+  .chip--done { color: var(--sev-low); }
+  .chip--crit { color: var(--sev-crit); }
+  .chip--high { color: var(--sev-high); }
+  .chip--med  { color: var(--sev-med); }
+  .chip--low  { color: var(--sev-low); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.05em; color: var(--accent);
+    background: var(--accent-dim); border-radius: 999px;
+    padding: 0.2rem 0.6rem; line-height: 1.4;
+  }
+
+  .sev {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-variant-numeric: tabular-nums; align-items: center;
+    color: var(--text-3);
+  }
+  .sev__i { display: flex; align-items: center; gap: 0.4rem; }
+  .sev__d { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+  .sev__n { color: var(--text); font-size: var(--xs); }
+  .sev__i--c .sev__d { background: var(--sev-crit); }
+  .sev__i--h .sev__d { background: var(--sev-high); }
+  .sev__i--m .sev__d { background: var(--sev-med); }
+  .sev__i--l .sev__d { background: var(--sev-low); }
+  .sev__i--n .sev__d { background: var(--sev-info); }
+
+  .acts { display: flex; flex-wrap: wrap; gap: 1.1rem; }
+  .act {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--accent); text-decoration: none;
+  }
+  .act:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+  .post {
+    display: grid; grid-template-columns: 6.5rem 1fr; gap: 1.25rem;
+    padding: 1.3rem 0; border-top: 1px solid var(--border); align-items: baseline;
+  }
+  .post:first-of-type { border-top: none; }
+  .post__d { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.08em; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .post__t { font-size: var(--base); font-weight: 600; margin: 0 0 0.25rem; }
+  .post__t a { text-decoration: none; }
+  .post__t a:hover { color: var(--accent); }
+  .post__s { margin: 0; color: var(--text-2); font-size: var(--sm); max-width: 56ch; text-wrap: pretty; }
+
+  .tw { overflow-x: auto; }
+  table.trk { border-collapse: collapse; width: 100%; min-width: 32rem; font-family: var(--mono); font-size: var(--xs); font-variant-numeric: tabular-nums; }
+  table.trk th {
+    text-align: left; font-weight: 400; font-size: var(--micro);
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3);
+    border-bottom: 1px solid var(--border); padding: 0 1rem 0.6rem 0;
+  }
+  table.trk td { padding: 0.7rem 1rem 0.7rem 0; border-bottom: 1px solid var(--border); color: var(--text-2); }
+  table.trk td:first-child { color: var(--text); }
+
+  /* ==================== WRITEUP VIEW ==================== */
+  [hidden] { display: none !important; }
+
+  .wnav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: color-mix(in srgb, var(--canvas) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 2rem;
+  }
+  .back {
+    font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--text-2); text-decoration: none;
+  }
+  .back:hover { color: var(--accent); }
+  .wnav .sp { margin-left: auto; }
+  .wnav .tog { color: var(--text-2); border: 1px solid var(--border); border-radius: 4px; padding: 0.35rem 0.6rem; }
+  .wnav .tog:hover { color: var(--text); border-color: var(--border-strong); }
+
+  .doc { max-width: 50rem; margin: 0 auto; padding: 3.5rem 2rem 5rem; }
+
+  .doc__eyebrow { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.9rem; }
+  .doc__title { font-size: var(--xxl); line-height: 1.12; letter-spacing: -0.025em; font-weight: 600; margin: 0 0 1.25rem; text-wrap: balance; }
+  .doc__meta { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; align-items: center; font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 1.1rem; }
+  .doc__meta b { color: var(--text-2); font-weight: 400; }
+
+  .doc__sev {
+    display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: center;
+    padding: 1rem 1.25rem; margin: 1.5rem 0 0;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.1em;
+    text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--text-3);
+  }
+
+  .doc h2 { font-size: var(--xl); font-weight: 600; letter-spacing: -0.02em; margin: 3rem 0 1rem; text-wrap: balance; }
+  .doc h3 { font-size: var(--lg); font-weight: 600; margin: 2rem 0 0.75rem; }
+  .doc p { color: var(--text-2); margin: 0 0 1rem; max-width: var(--measure); text-wrap: pretty; }
+  .doc p strong, .doc li strong { color: var(--text); font-weight: 600; }
+  .doc ul, .doc ol { color: var(--text-2); max-width: var(--measure); margin: 0 0 1rem; padding-left: 1.3rem; }
+  .doc li { margin-bottom: 0.45rem; }
+  .doc a { color: var(--accent); text-underline-offset: 3px; }
+
+  .lede { font-size: var(--lg); line-height: 1.55; color: var(--text) !important; border-left: 3px solid var(--accent); padding-left: 1.25rem; margin: 0 0 1rem; }
+
+  .icode { font-family: var(--mono); font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.08em 0.35em; color: var(--text); }
+
+  pre.code {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem 1.15rem; margin: 1.25rem 0; overflow-x: auto;
+    font-family: var(--mono); font-size: var(--xs); line-height: 1.65; color: var(--text);
+  }
+  pre.code .c { color: var(--text-3); }   /* comments + shell prompt — the only tint */
+
+  .fig { margin: 1.75rem 0; }
+  .fig__ph {
+    border: 1px dashed var(--border-strong); border-radius: 6px; background: var(--surface);
+    aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center;
+    color: var(--text-3); font-family: var(--mono); font-size: var(--micro);
+    letter-spacing: 0.12em; text-transform: uppercase; text-align: center; padding: 1.5rem;
+  }
+  .fig figcaption { margin-top: 0.65rem; font-size: var(--sm); color: var(--text-2); }
+  .fig figcaption b { color: var(--text); font-weight: 600; }
+
+  .find {
+    border: 1px solid var(--border); border-left: 3px solid var(--sev-info);
+    border-radius: 6px; padding: 1.4rem 1.5rem; margin: 1.25rem 0; display: grid; gap: 0.85rem;
+  }
+  .find--c { border-left-color: var(--sev-crit); }
+  .find--h { border-left-color: var(--sev-high); }
+  .find--m { border-left-color: var(--sev-med); }
+  .find--l { border-left-color: var(--sev-low); }
+  .find__head { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .find__id { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.12em; color: var(--accent); }
+  .find__t { font-size: var(--lg); font-weight: 600; letter-spacing: -0.01em; margin: 0; flex: 1 1 14rem; }
+  .find__lab { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-3); margin: 0.4rem 0 0; }
+  .find p, .find ol, .find ul { margin-bottom: 0; }
+
+  .docfoot { border-top: 1px solid var(--border); margin-top: 3.5rem; padding-top: 1.75rem; display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; }
+
+  @media (max-width: 760px) {
+    .wnav { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .doc { padding: 2.5rem 1.5rem 4rem; }
+  }
+
+  .notes { border-top: 1px solid var(--border); padding: 2.5rem 0 4rem; color: var(--text-3); font-size: var(--sm); }
+  .notes h3 { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.14em; text-transform: uppercase; font-weight: 400; color: var(--text-2); margin: 0 0 1rem; }
+  .notes ol { margin: 0; padding-left: 1.2rem; max-width: var(--measure); }
+  .notes li { margin-bottom: 0.5rem; }
+  .notes code { font-family: var(--mono); font-size: 0.85em; background: var(--surface); border: 1px solid var(--border); padding: 0.08em 0.35em; border-radius: 4px; }
+
+  /* ==================== RESPONSIVE ==================== */
+  @media (max-width: 1000px) {
+    .shell { grid-template-columns: 1fr; gap: 0; padding: 0 1.5rem; }
+    .rail { position: static; height: auto; padding: 4rem 0 0; justify-content: flex-start; }
+    .rail__nav { display: none; }
+    .content { padding-top: 3.5rem; }
+  }
+
+  @media (max-width: 760px) {
+    /* floating labels stay — like desktop; just the main sections, bigger tap area */
+    .hero { height: 66svh; min-height: 24rem; }
+    .chrome, .hero__foot { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .chrome__mid { display: none; }
+    .sky .lab--s { display: none; }        /* drop decorative domain labels on small screens */
+    .lab { padding: 0.5rem 0.6rem; }       /* larger touch target */
+
+    /* press highlight = blue text only, like desktop (stars light up via the canvas) */
+    .lab:active { color: var(--accent); }
+
+    .post { grid-template-columns: 1fr; gap: 0.3rem; }
+    /* engagement card highlights only when chosen (pressed), like desktop hover */
+    .eng { padding: 1.25rem; }
+    .eng:active { background: var(--surface); border-color: var(--accent); }
+
+    /* certs table shrinks to fit the screen — no horizontal scroll */
+    table.trk { min-width: 0; width: 100%; font-size: 0.6rem; table-layout: fixed; }
+    table.trk th, table.trk td { padding: 0.4rem 0.3rem 0.4rem 0; word-break: break-word; }
+    table.trk th { letter-spacing: 0.03em; }
+    .chip { font-size: 0.5625rem; padding: 0.1rem 0.32rem; letter-spacing: 0.04em; }
+
+    /* cursor light can't follow a finger — hide it on small screens */
+    #spot { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="site">
+
+  <div id="spot"></div>
+
+  <div id="view-home">
+
+  <header class="hero">
+    <canvas id="sky" aria-hidden="true"></canvas>
+
+    <div class="chrome">
+      <span class="chrome__name">Aleksandr Ivanov</span>
+      <nav class="chrome__mid" aria-label="Primary">
+        <a href="#summary">Summary</a>
+        <a href="#work">Work</a>
+        <a href="#blog">Blog</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button class="tog" type="button" aria-label="Switch colour theme">Theme &mdash; Auto</button>
+    </div>
+
+    <div class="sky" id="labels">
+      <a class="lab lab--xl" href="#work">Work</a>
+      <a class="lab lab--l"  href="#blog">Blog</a>
+      <a class="lab lab--m"   href="#summary">Summary</a>
+      <a class="lab lab--m"  href="#creds">Credentials</a>
+      <a class="lab lab--m"   href="#contact">Contact</a>
+      <a class="lab lab--s"  href="#work">Active Directory</a>
+      <a class="lab lab--s"  href="#work">Entra ID</a>
+      <a class="lab lab--s"   href="#work">Network</a>
+      <a class="lab lab--s"  href="#work">Detection</a>
+      <a class="lab lab--s"  href="#work">Cloud</a>
+      <a class="lab lab--s"  href="#work">SIEM</a>
+    </div>
+
+    <div class="hero__foot">
+      <span class="mono">Security Operations &mdash; Las Vegas, NV</span>
+      <span class="sp"></span>
+      <a class="mono cue" href="#summary">Scroll to summary &darr;</a>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <aside class="rail">
+      <div>
+        <h1 class="rail__name">Aleksandr Ivanov</h1>
+        <!-- EDIT: your role line. Shown under your name on every screen. -->
+        <p class="rail__role">Security Operations &middot; Cloud Security &middot; Networking</p>
+      </div>
+      <!-- EDIT: one or two sentences about how you work. -->
+      <p class="rail__blurb">
+        I build networks, attack them in my own lab, and write the detections
+        that would have caught me.
+      </p>
+      <nav class="rail__nav">
+        <a class="rail__link" href="#summary">Summary</a>
+        <a class="rail__link" href="#work">Work</a>
+        <a class="rail__link" href="#blog">Blog</a>
+        <a class="rail__link" href="#creds">Credentials</a>
+        <a class="rail__link" href="#contact">Contact</a>
+      </nav>
+      <div class="rail__soc">
+        <a class="mono" href="https://github.com/a-ivanov-dev">GitHub</a>
+        <a class="mono" href="https://www.linkedin.com/in/aleksandr-ivanov-a0841525b">LinkedIn</a>
+        <a class="mono" href="mailto:hello@aleksandrivanov.com">Email</a>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <section class="sec" id="summary">
+        <h2 class="sec__label"><span class="mono">01 &mdash; Summary</span></h2>
+        <!-- EDIT: 2–3 short paragraphs. Who you are, what you have done, what you want next. -->
+        <div class="prose">
+          <p>
+            I come from IT operations for a national retail chain with 320+
+            stores: building the network for 50+ store openings, running Active
+            Directory, Entra ID and Microsoft 365, and restoring around 100
+            endpoints during the July 2024 CrowdStrike outage. I worked closely
+            with the security team and want to be on it.
+          </p>
+          <p>
+            At home I run a segmented lab on Proxmox and OPNsense with its own
+            SIEM and IDS. I use it to practise the full loop a SOC analyst works
+            in: generate the attack, find it in the logs, write the detection,
+            and explain it.
+          </p>
+          <p>
+            Studying for CompTIA Security+. Heading toward security operations
+            first, then cloud security on Azure.
+          </p>
+        </div>
+      </section>
+
+      <section class="sec" id="work">
+        <h2 class="sec__label"><span class="mono">02 &mdash; Work</span></h2>
+
+        <!--
+          EDIT: one <article class="eng"> block per project. Copy a block to add one.
+          Status chip: chip--wip = In progress, chip--plan = Planned, chip--done = Complete.
+          Links: replace each href="#" with the real URL, or delete the link.
+        -->
+
+        <article class="eng">
+          <div class="eng__head">
+            <span class="eng__id">ENG&ndash;01</span>
+            <h3 class="eng__title">Segmented home lab with SIEM and IDS</h3>
+            <span class="chip chip--wip">In progress</span>
+          </div>
+          <p class="eng__sum">
+            VLAN-segmented lab on Proxmox with an OPNsense firewall at the edge.
+            Wazuh collects logs from seven agents across servers, the firewall
+            and a laptop, deployed with an Ansible role. Suricata runs as an IDS
+            on edge traffic and feeds its alerts into Wazuh.
+          </p>
+          <div class="tags"><span class="tag">Proxmox</span><span class="tag">OPNsense</span><span class="tag">Wazuh</span><span class="tag">Suricata</span><span class="tag">Ansible</span></div>
+        </article>
+
+        <article class="eng">
+          <div class="eng__head">
+            <span class="eng__id">ENG&ndash;02</span>
+            <h3 class="eng__title">Active Directory attacks and the detections that catch them</h3>
+            <span class="chip chip--plan">Planned</span>
+          </div>
+          <p class="eng__sum">
+            Attack a lab Active Directory domain with common techniques, then
+            write and test a Wazuh detection for each one.
+          </p>
+          <div class="tags"><span class="tag">Active Directory</span><span class="tag">Sysmon</span><span class="tag">Wazuh</span><span class="tag">ATT&amp;CK</span></div>
+        </article>
+
+        <article class="eng">
+          <div class="eng__head">
+            <span class="eng__id">ENG&ndash;03</span>
+            <h3 class="eng__title">LLM-assisted alert triage pipeline</h3>
+            <span class="chip chip--plan">Planned</span>
+          </div>
+          <p class="eng__sum">
+            Enrich and pre-triage lab IDS alerts with a locally hosted model,
+            orchestrated in n8n, so the data never leaves the network.
+          </p>
+          <div class="tags"><span class="tag">Ollama</span><span class="tag">n8n</span><span class="tag">Suricata</span><span class="tag">Python</span></div>
+        </article>
+
+        <!-- TEMPLATE card: hidden from visitors. Copy it, remove the word hidden, fill it in. -->
+        <article class="eng" hidden>
+          <div class="eng__head">
+            <span class="eng__id">ENG&ndash;NN</span>
+            <h3 class="eng__title"><span class="field">[ Project title ]</span></h3>
+            <span class="chip chip--plan">Planned</span>
+          </div>
+          <p class="eng__sum">
+            <span class="field">[ Two or three sentences: what you did, on what, and what came out of it. Write it for a hiring manager who reads only this card. ]</span>
+          </p>
+          <div class="tags"><span class="tag">[ tool ]</span><span class="tag">[ tool ]</span><span class="tag">[ tool ]</span></div>
+          <div class="acts"><a class="act" href="#/eng-nn">Read full writeup &rarr;</a></div>
+        </article>
+      </section>
+
+      <section class="sec" id="blog">
+        <h2 class="sec__label"><span class="mono">03 &mdash; Blog</span></h2>
+
+        <!-- EDIT: one <article class="post"> block per post, newest first. Copy the block to add a post. -->
+        <p class="post__s">First post coming soon.</p>
+        <!-- TEMPLATE post: hidden from visitors. Copy it, remove the word hidden, fill it in, then delete the coming-soon line above. -->
+        <article class="post" hidden>
+          <span class="post__d"><span class="field">[ YYYY &mdash; MM ]</span></span>
+          <div>
+            <h3 class="post__t"><a href="#"><span class="field">[ Post title ]</span></a></h3>
+            <p class="post__s"><span class="field">[ One or two sentences: what the post covers and why it is worth reading. ]</span></p>
+          </div>
+        </article>
+      </section>
+
+      <section class="sec" id="creds">
+        <h2 class="sec__label"><span class="mono">04 &mdash; Credentials</span></h2>
+        <!-- EDIT: one <tr> row per cert. Status chip: chip--wip, chip--plan, or chip--done once passed. -->
+        <div class="tw">
+          <table class="trk">
+            <thead>
+              <tr><th scope="col">Credential</th><th scope="col">Domain</th><th scope="col">Target</th><th scope="col">Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CompTIA Security+</td><td>Foundations</td><td>2026 Q4</td><td><span class="chip chip--wip">In progress</span></td></tr>
+              <tr><td>Microsoft AZ&ndash;900</td><td>Azure fundamentals</td><td>2027 Q1</td><td><span class="chip chip--plan">Planned</span></td></tr>
+              <tr><td>HTB CJCA</td><td>Red + blue analyst</td><td>2027 Q2</td><td><span class="chip chip--plan">Planned</span></td></tr>
+              <tr><td>Microsoft AZ&ndash;500</td><td>Azure security engineer</td><td>2027 Q3</td><td><span class="chip chip--plan">Planned</span></td></tr>
+              <tr><td>HTB CPTS</td><td>Penetration testing</td><td>2028 Q1</td><td><span class="chip chip--plan">Planned</span></td></tr>
+              <tr><td>CARTP</td><td>Azure red team</td><td>2028 Q3</td><td><span class="chip chip--plan">Planned</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="sec" id="contact">
+        <h2 class="sec__label"><span class="mono">05 &mdash; Contact</span></h2>
+        <h3 class="sec__h">Get in touch</h3>
+        <div class="prose">
+          <p>
+            Open to SOC analyst and security operations roles. Happy to walk
+            through any project above in detail, including what I got wrong the
+            first time.
+          </p>
+          <p>
+            <a href="mailto:hello@aleksandrivanov.com">hello@aleksandrivanov.com</a> &nbsp;&middot;&nbsp;
+            <a href="https://github.com/a-ivanov-dev">GitHub</a> &nbsp;&middot;&nbsp;
+            <a href="https://www.linkedin.com/in/aleksandr-ivanov-a0841525b">LinkedIn</a>
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  </div><!-- /view-home -->
+
+  <!-- ==================== WRITEUP VIEW ==================== -->
+  <div id="view-writeup" hidden>
+    <nav class="wnav">
+      <a class="back" href="#work">&larr; Work</a>
+      <span class="sp"></span>
+      <button class="tog" type="button" aria-label="Switch colour theme">Theme &mdash; Auto</button>
+    </nav>
+
+    <!--
+      WRITEUP TEMPLATE. Replace every [ bracketed ] line with your own text.
+      Keep the section order: summary first, details after. A reader who stops
+      after the executive summary should still understand what happened.
+    -->
+    <article class="doc">
+      <p class="doc__eyebrow">ENG&ndash;NN &middot; <span class="field">[ Type of work, e.g. Detection engineering, Lab build, Threat hunt ]</span></p>
+      <h1 class="doc__title"><span class="field">[ Writeup title ]</span></h1>
+      <div class="doc__meta">
+        <span>Date <b><span class="field">[ YYYY&ndash;MM ]</span></b></span>
+        <span>Type <b><span class="field">[ e.g. Home lab ]</span></b></span>
+        <span>Scope <b><span class="field">[ e.g. 3 hosts ]</span></b></span>
+        <span>Status <b>Template</b></span>
+      </div>
+      <div class="tags">
+        <span class="tag">[ tool ]</span><span class="tag">[ tool ]</span><span class="tag">[ tool ]</span>
+      </div>
+
+      <!-- EDIT: the count of findings at each severity. Delete this strip if the writeup has no findings. -->
+      <div class="doc__sev" aria-label="Findings by severity">
+        <span class="sev__i sev__i--c"><span class="sev__d"></span>Crit <span class="sev__n">0</span></span>
+        <span class="sev__i sev__i--h"><span class="sev__d"></span>High <span class="sev__n">0</span></span>
+        <span class="sev__i sev__i--m"><span class="sev__d"></span>Med <span class="sev__n">0</span></span>
+        <span class="sev__i sev__i--l"><span class="sev__d"></span>Low <span class="sev__n">0</span></span>
+      </div>
+
+      <h2>Executive summary</h2>
+      <p class="lede">
+        <span class="field">[ One or two sentences: the single most important result. Plain English, for a manager who reads nothing else. ]</span>
+      </p>
+      <p>
+        <span class="field">[ What you set out to do, where you started from, and how far it got. ]</span>
+      </p>
+
+      <h2>Scope &amp; methodology</h2>
+      <p>
+        <span class="field">[ What you tested or built, and the method you followed, e.g. PTES phases or the ATT&amp;CK techniques covered. ]</span>
+      </p>
+      <ul>
+        <li><strong>In scope:</strong> <span class="field">[ systems, accounts, data sources ]</span></li>
+        <li><strong>Starting point:</strong> <span class="field">[ the access or data you began with ]</span></li>
+        <li><strong>Out of scope:</strong> <span class="field">[ what you deliberately left out ]</span></li>
+      </ul>
+
+      <!-- EDIT: one <figure> per screenshot or diagram. -->
+      <figure class="fig">
+        <div class="fig__ph">[ Figure 1 &mdash; screenshot or diagram goes here ]</div>
+        <figcaption><b>Figure 1.</b> <span class="field">[ One sentence saying what the reader should notice in the figure. ]</span></figcaption>
+      </figure>
+
+      <h2>Findings</h2>
+
+      <!--
+        EDIT: one <div class="find ..."> block per finding. Copy the block to add more.
+        Severity: find--c + chip--crit = Critical, find--h + chip--high = High,
+                  find--m + chip--med = Medium,  find--l + chip--low = Low.
+      -->
+      <div class="find find--h">
+        <div class="find__head">
+          <span class="find__id">F&ndash;01</span>
+          <h3 class="find__t"><span class="field">[ Finding title: what is wrong, in one line ]</span></h3>
+          <span class="chip chip--high">High</span>
+        </div>
+        <p>
+          <span class="field">[ What the issue is, why it matters, and what an attacker could do with it. ]</span>
+        </p>
+        <p class="find__lab">Reproduction</p>
+        <pre class="code"><span class="c"># [ step 1 — what this command does ]</span>
+[ command ]
+
+<span class="c"># [ step 2 ]</span>
+[ command ]</pre>
+        <p class="find__lab">Remediation</p>
+        <ul>
+          <li><span class="field">[ The fix, specific enough that an admin could apply it. ]</span></li>
+          <li><span class="field">[ How to detect it if it happens again. ]</span></li>
+        </ul>
+      </div>
+
+      <h2>Conclusion</h2>
+      <p>
+        <span class="field">[ What the results mean overall, what to fix first, and what you would do next. ]</span>
+      </p>
+
+      <div class="docfoot">
+        <!-- EDIT: link to the full report or repository, or delete these two links. -->
+        <a class="act" href="#">Full report (PDF) &rarr;</a>
+        <a class="act" href="#">Repository &rarr;</a>
+        <span class="sp"></span>
+        <a class="back" href="#work">All work &rarr;</a>
+      </div>
+    </article>
+  </div><!-- /view-writeup -->
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var togs = Array.prototype.slice.call(document.querySelectorAll('.tog'));
+
+    /* label reflects the real current state, including a theme restored from storage */
+    function setTogLabel() {
+      var cur = root.getAttribute('data-theme');
+      var lbl = cur === 'dark' ? 'Theme — Dark' : (cur === 'light' ? 'Theme — Light' : 'Theme — Auto');
+      togs.forEach(function (b) { b.textContent = lbl; });
+    }
+
+    function flipTheme() {
+      var cur = root.getAttribute('data-theme');
+      if (!cur) cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}   /* private windows throw */
+      setTogLabel();
+      readColors();
+      draw();
+    }
+    togs.forEach(function (b) { b.addEventListener('click', flipTheme); });
+    setTogLabel();
+
+    /* ---- routing: home <-> writeup, one seamless site ---- */
+    var vHome = document.getElementById('view-home');
+    var vDoc = document.getElementById('view-writeup');
+    function route() {
+      var isDoc = /^#\/eng/.test(location.hash);
+      vHome.hidden = isDoc;
+      vDoc.hidden = !isDoc;
+      if (isDoc) {
+        window.scrollTo(0, 0);
+      } else {
+        if (typeof resize === 'function') resize();
+        if (location.hash && location.hash !== '#') {
+          /* getElementById never throws on a fragment like #1; querySelector does,
+             and the throw used to abort init before the animation was started */
+          var t = document.getElementById(location.hash.slice(1));
+          if (t) t.scrollIntoView();
+        }
+      }
+    }
+    window.addEventListener('hashchange', route);
+
+    var cv = document.getElementById('sky');
+    var ctx = cv.getContext('2d');
+    var labelEls = Array.prototype.slice.call(document.querySelectorAll('.lab'));
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var COUNT = 130;
+    var LINK = 0.60;            /* 3D proximity threshold, model units */
+    var stars = [];            /* {x,y,z} in the unit ball */
+    var edges = [];            /* [i, j, strength] — static in model space */
+    var lnodes = [];           /* section labels as 3D nodes {x,y,z,el,near[]} */
+    var proj = [];             /* per-frame projected stars */
+    var W = 0, H = 0, cx = 0, cy = 0, spread = 0;
+    var focal = 2.7;
+    var ink = '255,255,255';
+    var accentRGB = '88,166,255';
+    var autoYaw = 0, offAy = 0, offAx = 0, tAy = 0, tAx = 0;
+    var hovered = -1;
+
+    /* device + interaction config — declared before draw()/resize() read them */
+    var mqMobile = window.matchMedia('(max-width: 760px)');
+    var canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var heroVisible = true;
+    var dragging = false, dragSX = 0, dragSY = 0, dragAy = 0, dragAx = 0;
+    function animating() { return !reduce; }   /* static only for reduced-motion */
+
+    function readColors() {
+      var s = getComputedStyle(root);
+      ink = (s.getPropertyValue('--hero-ink').trim()) || '255,255,255';
+      accentRGB = (s.getPropertyValue('--accent-rgb').trim()) || '88,166,255';
+    }
+    readColors();
+
+    /* stars distributed through a unit ball — gives real volume */
+    for (var i = 0; i < COUNT; i++) {
+      var x, y, z;
+      do { x = Math.random() * 2 - 1; y = Math.random() * 2 - 1; z = Math.random() * 2 - 1; }
+      while (x * x + y * y + z * z > 1);
+      stars.push({ x: x, y: y, z: z, t: Math.random() });   /* t = when it pops in (0..1 of reveal) */
+    }
+
+    /* load-in clock: stars fade in one-by-one from nowhere */
+    var startTime = (window.performance && performance.now) ? performance.now() : 0;
+    var REVEAL = 1800, FADE = 480;   /* ms: total scatter-in span, per-star fade */
+
+    /* labels evenly spread on a sphere (fibonacci) so they sit around the cloud */
+    (function () {
+      var n = labelEls.length;
+      var gold = Math.PI * (3 - Math.sqrt(5));
+      for (var k = 0; k < n; k++) {
+        var yy = (n === 1) ? 0 : 1 - (k / (n - 1)) * 2;
+        var rr = Math.sqrt(Math.max(0, 1 - yy * yy));
+        var th = gold * k;
+        lnodes.push({
+          x: Math.cos(th) * rr * 0.9,
+          y: yy * 0.9,
+          z: Math.sin(th) * rr * 0.9,
+          el: labelEls[k],
+          near: []
+        });
+      }
+    })();
+
+    /* 3D proximity edges — distances are rotation-invariant, so build once */
+    for (var a = 0; a < COUNT; a++) {
+      for (var b = a + 1; b < COUNT; b++) {
+        var dx = stars[a].x - stars[b].x, dy = stars[a].y - stars[b].y, dz = stars[a].z - stars[b].z;
+        var d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (d < LINK) edges.push([a, b, 1 - d / LINK]);
+      }
+    }
+
+    /* nearest stars to each label — the constellation drawn on hover */
+    lnodes.forEach(function (ln) {
+      var ds = [];
+      for (var s = 0; s < COUNT; s++) {
+        var ex = ln.x - stars[s].x, ey = ln.y - stars[s].y, ez = ln.z - stars[s].z;
+        ds.push([s, ex * ex + ey * ey + ez * ez]);
+      }
+      ds.sort(function (p, q) { return p[1] - q[1]; });
+      ln.near = ds.slice(0, 5).map(function (p) { return p[0]; });
+    });
+
+    /* mobile: the primary nav labels ride real, evenly-spread stars in the cluster */
+    var navLabels = lnodes.filter(function (ln) { return !ln.el.classList.contains('lab--s'); });
+    lnodes.forEach(function (ln) { ln.navIndex = -1; });
+    navLabels.forEach(function (ln, i) { ln.navIndex = i; });
+    var navAnchors = (function (K) {
+      var gold = Math.PI * (3 - Math.sqrt(5)), out = [], used = {};
+      for (var i = 0; i < K; i++) {
+        var yy = (K === 1) ? 0 : 1 - (i / (K - 1)) * 2;
+        var rr = Math.sqrt(Math.max(0, 1 - yy * yy)), th = gold * i;
+        var tx = Math.cos(th) * rr, ty = yy, tz = Math.sin(th) * rr;
+        var best = -1, bd = 1e9;
+        for (var s = 0; s < COUNT; s++) {
+          if (used[s]) continue;
+          var dx = stars[s].x - tx, dy = stars[s].y - ty, dz = stars[s].z - tz;
+          var d = dx * dx + dy * dy + dz * dz;
+          if (d < bd) { bd = d; best = s; }
+        }
+        used[best] = true; out.push(best);
+      }
+      return out;
+    })(navLabels.length);
+
+    /* nearest stars to each anchor — the little constellation shown on press */
+    var anchorNear = navAnchors.map(function (ai) {
+      var ds = [];
+      for (var s = 0; s < COUNT; s++) {
+        if (s === ai) continue;
+        var dx = stars[s].x - stars[ai].x, dy = stars[s].y - stars[ai].y, dz = stars[s].z - stars[ai].z;
+        ds.push([s, dx * dx + dy * dy + dz * dz]);
+      }
+      ds.sort(function (p, q) { return p[1] - q[1]; });
+      return ds.slice(0, 5).map(function (p) { return p[0]; });
+    });
+    var pressNav = -1;   /* which nav label is currently pressed (touch) */
+
+    function project(p) {
+      var ay = autoYaw + offAy, axx = offAx;
+      var cY = Math.cos(ay), sY = Math.sin(ay);
+      var x1 = p.x * cY - p.z * sY;
+      var z1 = p.x * sY + p.z * cY;
+      var cX = Math.cos(axx), sX = Math.sin(axx);
+      var y1 = p.y * cX - z1 * sX;
+      var z2 = p.y * sX + z1 * cX;
+      var s = focal / (focal - z2);
+      return { X: cx + x1 * s * spread, Y: cy + y1 * s * spread, s: s, z: z2 };
+    }
+
+    function resize() {
+      var r = cv.getBoundingClientRect();
+      if (r.width < 10 || r.height < 10) return;
+      var dpr = window.devicePixelRatio || 1;
+      W = r.width; H = r.height; cx = W / 2; cy = H / 2;
+      /* pull the cloud in on phones so the floating labels stay on-screen */
+      spread = Math.min(W, H) * (mqMobile.matches ? 0.32 : 0.46);
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function draw() {
+      if (!W || !ctx) return;
+      ctx.clearRect(0, 0, W, H);
+
+      for (var i = 0; i < COUNT; i++) proj[i] = project(stars[i]);
+
+      /* load-in reveal: stars scatter in first, then mesh + labels follow */
+      var now = (window.performance && performance.now) ? performance.now() : 0;
+      var elapsed = now - startTime;
+      var gRev = reduce ? 1 : Math.max(0, Math.min(1, (elapsed - REVEAL * 0.5) / 700));
+
+      /* mesh — faint, depth-faded */
+      ctx.strokeStyle = 'rgb(' + ink + ')';
+      ctx.lineWidth = 1;
+      for (var e = 0; e < edges.length; e++) {
+        var A = proj[edges[e][0]], B = proj[edges[e][1]], t = edges[e][2];
+        var df = (((A.z + B.z) / 2) + 1) / 2;
+        ctx.globalAlpha = 0.10 * t * (0.35 + df * 0.85) * gRev;
+        ctx.beginPath(); ctx.moveTo(A.X, A.Y); ctx.lineTo(B.X, B.Y); ctx.stroke();
+      }
+
+      /* stars — nearer ones bigger + brighter; each fades in on its own beat */
+      ctx.fillStyle = 'rgb(' + ink + ')';
+      for (var s2 = 0; s2 < COUNT; s2++) {
+        var p = proj[s2], d2 = (p.z + 1) / 2;
+        var rv = reduce ? 1 : Math.max(0, Math.min(1, (elapsed - stars[s2].t * REVEAL) / FADE));
+        if (rv <= 0) continue;
+        ctx.globalAlpha = (0.13 + d2 * 0.55) * rv;
+        ctx.beginPath(); ctx.arc(p.X, p.Y, (0.4 + d2 * 1.4) * p.s * (0.55 + 0.45 * rv), 0, Math.PI * 2); ctx.fill();
+      }
+
+      /* hover: light up the constellation (desktop-wide cursor only — labels there sit on their 3D points) */
+      if (hovered >= 0 && canHover && !mqMobile.matches) {
+        var ln = lnodes[hovered], lp = project(ln);
+        ctx.lineWidth = 1;
+        for (var k = 0; k < ln.near.length; k++) {
+          var sp = proj[ln.near[k]];
+          ctx.strokeStyle = 'rgba(' + accentRGB + ',0.5)';
+          ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.moveTo(lp.X, lp.Y); ctx.lineTo(sp.X, sp.Y); ctx.stroke();
+          ctx.fillStyle = 'rgba(' + accentRGB + ',0.85)';
+          ctx.beginPath(); ctx.arc(sp.X, sp.Y, 1.7 * sp.s, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(' + accentRGB + ',0.95)';
+        ctx.beginPath(); ctx.arc(lp.X, lp.Y, 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      var mobile = mqMobile.matches;
+
+      if (mobile) {
+        /* pressed (touch) or hovered (small-screen mouse) → light up that label's stars */
+        var activeNav = (!canHover) ? pressNav
+          : (hovered >= 0 && lnodes[hovered] ? lnodes[hovered].navIndex : -1);
+        if (activeNav >= 0 && activeNav < navLabels.length) {
+          var alp = proj[navAnchors[activeNav]];
+          ctx.lineWidth = 1; ctx.globalAlpha = 1;
+          for (var ak = 0; ak < anchorNear[activeNav].length; ak++) {
+            var asp = proj[anchorNear[activeNav][ak]];
+            ctx.strokeStyle = 'rgba(' + accentRGB + ',0.55)';
+            ctx.beginPath(); ctx.moveTo(alp.X, alp.Y); ctx.lineTo(asp.X, asp.Y); ctx.stroke();
+            ctx.fillStyle = 'rgba(' + accentRGB + ',0.85)';
+            ctx.beginPath(); ctx.arc(asp.X, asp.Y, 1.9, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = 'rgba(' + accentRGB + ',0.95)';
+          ctx.beginPath(); ctx.arc(alp.X, alp.Y, 3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        /* each label pinned to its anchor star — moves with the drifting cluster */
+        ctx.fillStyle = 'rgb(' + ink + ')';
+        for (var m = 0; m < navLabels.length; m++) {
+          var ap = proj[navAnchors[m]];
+          var an = (ap.z + 1) / 2;                       /* 0 far .. 1 near */
+          ctx.globalAlpha = (0.5 + an * 0.5) * gRev;
+          ctx.beginPath(); ctx.arc(ap.X, ap.Y, 1.6 + an * 1.5, 0, Math.PI * 2); ctx.fill();
+          var em = navLabels[m].el;
+          em.style.left = ap.X + 'px';
+          em.style.top = ap.Y + 'px';
+          em.style.transform = 'translate(-50%,-50%) scale(' + (0.85 + an * 0.35).toFixed(3) + ')';
+          em.style.opacity = (Math.max(0.45, Math.min(1, 0.55 + an * 0.5)) * gRev).toFixed(3);
+          em.style.zIndex = Math.round(ap.s * 100);
+        }
+        ctx.globalAlpha = 1;
+      } else {
+        /* desktop: labels ride the rotating 3D cloud, scaled by depth */
+        for (var l = 0; l < lnodes.length; l++) {
+          var lp2 = project(lnodes[l]), el = lnodes[l].el;
+          var norm = (lp2.s - 0.72) / (1.63 - 0.72);   /* 0 far .. 1 near */
+          el.style.left = lp2.X + 'px';
+          el.style.top = lp2.Y + 'px';
+          el.style.transform = 'translate(-50%,-50%) scale(' + (0.78 + norm * 0.6).toFixed(3) + ')';
+          el.style.opacity = (Math.max(0.18, Math.min(1, 0.34 + norm * 0.62)) * gRev).toFixed(3);
+          el.style.zIndex = Math.round(lp2.s * 100);
+        }
+      }
+    }
+
+    /* desktop: hover tilts the cloud toward the cursor */
+    function onMove(ev) {
+      if (!canHover || !animating()) return;
+      var r = cv.getBoundingClientRect();
+      var nx = (ev.clientX - r.left) / r.width;
+      var ny = (ev.clientY - r.top) / r.height;
+      tAy = (nx - 0.5) * 0.9;      /* look left/right */
+      tAx = (ny - 0.5) * -0.7;     /* tilt up/down */
+    }
+
+    /* touch (and mouse-drag): drag to spin the cluster */
+    var hero = document.querySelector('.hero');
+    hero.addEventListener('pointerdown', function (ev) {
+      if (canHover) return;         /* desktop uses hover, not drag */
+      dragging = true;
+      dragSX = ev.clientX; dragSY = ev.clientY; dragAy = offAy; dragAx = offAx;
+    });
+    /* one pointermove: cursor spotlight (desktop) + drag-spin (touch) */
+    window.addEventListener('pointermove', function (ev) {
+      root.style.setProperty('--mx', ev.clientX + 'px');
+      root.style.setProperty('--my', ev.clientY + 'px');
+      if (!dragging || !animating()) return;
+      var dx = (ev.clientX - dragSX) / Math.max(1, W);
+      var dy = (ev.clientY - dragSY) / Math.max(1, H);
+      tAy = dragAy + dx * 3.6;      /* horizontal drag → spin (more sensitive) */
+      tAx = dragAx - dy * 2.6;      /* vertical drag → tilt */
+    });
+    function endDrag() { dragging = false; pressNav = -1; }
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    lnodes.forEach(function (ln, idx) {
+      function on() { if (canHover) hovered = idx; }   /* cursor devices only */
+      function off2() { hovered = -1; }
+      ln.el.addEventListener('mouseenter', on);
+      ln.el.addEventListener('mouseleave', off2);
+      ln.el.addEventListener('focus', on);
+      ln.el.addEventListener('blur', off2);
+      /* touch: while pressed, light up this label's stars; released → gone */
+      if (ln.navIndex >= 0) {
+        ln.el.addEventListener('pointerdown', function () { if (!canHover) pressNav = ln.navIndex; });
+      }
+    });
+
+    var running = false;
+    function loop() {
+      if (!animating() || !heroVisible) { running = false; return; }
+      if (!dragging) autoYaw += mqMobile.matches ? 0.0009 : 0.0016;   /* drift; pause while dragging */
+      offAy += (tAy - offAy) * (dragging ? 0.18 : 0.05);
+      offAx += (tAx - offAx) * (dragging ? 0.18 : 0.05);
+      if (!vHome.hidden) draw();
+      requestAnimationFrame(loop);
+    }
+    function ensureEngine() {
+      if (animating() && heroVisible) {
+        if (!running) { running = true; requestAnimationFrame(loop); }
+      } else {
+        running = false;
+        draw();                    /* one calm static frame */
+      }
+    }
+
+    /* pause the animation whenever the sky is scrolled out of view — saves battery */
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        heroVisible = entries[0].isIntersecting;
+        ensureEngine();
+      }, { threshold: 0 });
+      io.observe(document.querySelector('.hero'));
+    }
+
+    window.addEventListener('resize', function () { resize(); ensureEngine(); });
+    if (mqMobile.addEventListener) {
+      mqMobile.addEventListener('change', function () { resize(); ensureEngine(); });
+    }
+    document.querySelector('.hero').addEventListener('pointermove', onMove);
+    resize();
+    route();                       /* safe now — engine is fully initialised */
+    ensureEngine();
+  })();
+</script>
+
+</body>
+</html>
