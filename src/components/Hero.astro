@@ -1,0 +1,36 @@
+---
+import { SITE, TOPICS, type Topic } from '../config';
+
+interface Props { topics: Topic[]; }
+const { topics } = Astro.props;
+---
+<header class="hero">
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <div class="chrome">
+    <span class="chrome__name">{SITE.name}</span>
+    <nav class="chrome__mid" aria-label="Primary">
+      <a href="#summary">Summary</a>
+      <a href="#work">Work</a>
+      <a href="#blog">Blog</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="tog" type="button" aria-label="Switch colour theme">Theme &mdash; Auto</button>
+  </div>
+
+  <!-- Big labels = sections. Small labels = topics, generated from content. -->
+  <div class="sky" id="labels">
+    <a class="lab lab--xl" href="#work">Work</a>
+    <a class="lab lab--l" href="#blog">Blog</a>
+    <a class="lab lab--m" href="#summary">Summary</a>
+    <a class="lab lab--m" href="#creds">Credentials</a>
+    <a class="lab lab--m" href="#contact">Contact</a>
+    {topics.map((t) => <a class="lab lab--s" href={`/topics/${t}/`}>{TOPICS[t]}</a>)}
+  </div>
+
+  <div class="hero__foot">
+    <span class="mono">{SITE.heroLine} &mdash; {SITE.location}</span>
+    <span class="sp"></span>
+    <a class="mono cue" href="#summary">Scroll to summary &darr;</a>
+  </div>
+</header>

@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import DocPage from '../../components/DocPage.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import PostItem from '../../components/PostItem.astro';
+import { TOPICS, type Topic } from '../../config';
+import { getWork, getPosts, getUsedTopics } from '../../lib/content';
+
+// One page per topic that has content, e.g. /topics/detection/
+export async function getStaticPaths() {
+  return (await getUsedTopics()).map((topic) => ({ params: { topic } }));
+}
+
+const topic = Astro.params.topic as Topic;
+const name = TOPICS[topic];
+const work = (await getWork()).filter((e) => e.data.topics.includes(topic));
+const posts = (await getPosts()).filter((e) => e.data.topics.includes(topic));
+---
+<Base title={name} description={`Projects and posts about ${name}.`}>
+  <DocPage>
+    <p class="doc__eyebrow">Topic</p>
+    <h1 class="doc__title">{name}</h1>
+    {work.length > 0 && <><h2>Work</h2>{work.map((entry) => <WorkCard entry={entry} />)}</>}
+    {posts.length > 0 && <><h2>Blog</h2>{posts.map((entry) => <PostItem entry={entry} />)}</>}
+  </DocPage>
+</Base>

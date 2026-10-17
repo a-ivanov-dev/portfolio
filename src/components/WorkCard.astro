@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { STATUS } from '../config';
+import { hasWriteup } from '../lib/content';
+
+interface Props { entry: CollectionEntry<'work'>; }
+const { entry } = Astro.props;
+const d = entry.data;
+const st = STATUS[d.status as keyof typeof STATUS];
+const writeup = hasWriteup(entry);
+---
+<article class="eng">
+  <div class="eng__head">
+    <span class="eng__id">{d.code.replace('-', '–')}</span>
+    <h3 class="eng__title">{d.title}</h3>
+    <span class={`chip chip--${st.chip}`}>{st.label}</span>
+  </div>
+  <p class="eng__sum">{d.summary}</p>
+  {d.tags.length > 0 && <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>}
+  {(writeup || d.links.length > 0) && (
+    <div class="acts">
+      {writeup && <a class="act" href={`/work/${entry.id}/`}>Read full writeup &rarr;</a>}
+      {d.links.map((l) => <a class="act" href={l.href}>{l.label} &rarr;</a>)}
+    </div>
+  )}
+</article>

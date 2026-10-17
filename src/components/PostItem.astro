@@ -1,0 +1,14 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { ym } from '../lib/content';
+
+interface Props { entry: CollectionEntry<'blog'>; }
+const { entry } = Astro.props;
+---
+<article class="post">
+  <span class="post__d">{ym(entry.data.date)}</span>
+  <div>
+    <h3 class="post__t"><a href={`/blog/${entry.id}/`}>{entry.data.title}</a></h3>
+    <p class="post__s">{entry.data.summary}</p>
+  </div>
+</article>

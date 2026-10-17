@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import WorkCard from '../components/WorkCard.astro';
+import PostItem from '../components/PostItem.astro';
+import { SITE, STATUS, CREDENTIALS } from '../config';
+import { getWork, getPosts, getUsedTopics } from '../lib/content';
+import { Content as Summary } from '../data/summary.md';
+
+const work = await getWork();
+const posts = await getPosts();
+const topics = await getUsedTopics();
+
+// Structured data so search engines connect the site to you as a person.
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.name,
+  url: Astro.site?.toString(),
+  address: { '@type': 'PostalAddress', addressLocality: 'Las Vegas', addressRegion: 'NV', addressCountry: 'US' },
+  sameAs: [SITE.github, SITE.linkedin],
+};
+---
+<Base>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(person)}></script>
+
+  <Hero topics={topics} />
+
+  <div class="shell">
+    <aside class="rail">
+      <div>
+        <h1 class="rail__name">{SITE.name}</h1>
+        <p class="rail__role">{SITE.role}</p>
+      </div>
+      <p class="rail__blurb">{SITE.blurb}</p>
+      <nav class="rail__nav">
+        <a class="rail__link" href="#summary">Summary</a>
+        <a class="rail__link" href="#work">Work</a>
+        <a class="rail__link" href="#blog">Blog</a>
+        <a class="rail__link" href="#creds">Credentials</a>
+        <a class="rail__link" href="#contact">Contact</a>
+      </nav>
+      <div class="rail__soc">
+        <a class="mono" href={SITE.github}>GitHub</a>
+        <a class="mono" href={SITE.linkedin}>LinkedIn</a>
+        <a class="mono" href={`mailto:${SITE.email}`}>Email</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="sec" id="summary">
+        <h2 class="sec__label"><span class="mono">01 &mdash; Summary</span></h2>
+        <div class="prose"><Summary /></div>
+      </section>
+
+      <section class="sec" id="work">
+        <h2 class="sec__label"><span class="mono">02 &mdash; Work</span></h2>
+        {work.map((entry) => <WorkCard entry={entry} />)}
+      </section>
+
+      <section class="sec" id="blog">
+        <h2 class="sec__label"><span class="mono">03 &mdash; Blog</span></h2>
+        {posts.length === 0
+          ? <p class="post__s">First post coming soon.</p>
+          : posts.map((entry) => <PostItem entry={entry} />)}
+      </section>
+
+      <section class="sec" id="creds">
+        <h2 class="sec__label"><span class="mono">04 &mdash; Credentials</span></h2>
+        <div class="tw">
+          <table class="trk">
+            <thead>
+              <tr><th scope="col">Credential</th><th scope="col">Domain</th><th scope="col">Target</th><th scope="col">Status</th></tr>
+            </thead>
+            <tbody>
+              {CREDENTIALS.map((c) => (
+                <tr>
+                  <td>{c.name}</td><td>{c.domain}</td><td>{c.target}</td>
+                  <td><span class={`chip chip--${STATUS[c.status].chip}`}>{STATUS[c.status].label}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="sec" id="contact">
+        <h2 class="sec__label"><span class="mono">05 &mdash; Contact</span></h2>
+        <h3 class="sec__h">Get in touch</h3>
+        <div class="prose">
+          <p>{SITE.contact}</p>
+          <p>
+            <a href={`mailto:${SITE.email}`}>{SITE.email}</a> &nbsp;&middot;&nbsp;
+            <a href={SITE.github}>GitHub</a> &nbsp;&middot;&nbsp;
+            <a href={SITE.linkedin}>LinkedIn</a>
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script is:inline src="/scripts/sky.js" defer slot="scripts"></script>
+</Base>

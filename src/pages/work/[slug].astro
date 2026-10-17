@@ -1,0 +1,44 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DocPage from '../../components/DocPage.astro';
+import { STATUS } from '../../config';
+import { getWork, hasWriteup, ym } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const work = (await getWork()).filter(hasWriteup);
+  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const f = d.findings;
+const sev = f ? ([['c', 'Crit', f.crit], ['h', 'High', f.high], ['m', 'Med', f.med], ['l', 'Low', f.low]] as const).filter((s) => s[2] !== undefined) : [];
+---
+<Base title={d.title} description={d.summary}>
+  <DocPage>
+    <p class="doc__eyebrow">{d.code.replace('-', '–')}{d.type && <> &middot; {d.type}</>}</p>
+    <h1 class="doc__title">{d.title}</h1>
+    <div class="doc__meta">
+      <span>Date <b>{ym(d.date, '–')}</b></span>
+      {d.type && <span>Type <b>{d.type}</b></span>}
+      {d.scope && <span>Scope <b>{d.scope}</b></span>}
+      <span>Status <b>{STATUS[d.status as keyof typeof STATUS].label}</b></span>
+    </div>
+    {d.tags.length > 0 && <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>}
+    {sev.length > 0 && (
+      <div class="doc__sev" aria-label="Findings by severity">
+        {sev.map(([k, label, n]) => <span class={`sev__i sev__i--${k}`}><span class="sev__d"></span>{label} <span class="sev__n">{n}</span></span>)}
+      </div>
+    )}
+
+    <Content />
+
+    <div class="docfoot">
+      {d.links.map((l) => <a class="act" href={l.href}>{l.label} &rarr;</a>)}
+      <span class="sp"></span>
+      <a class="back" href="/#work">All work &rarr;</a>
+    </div>
+  </DocPage>
+</Base>

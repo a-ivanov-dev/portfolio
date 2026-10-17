@@ -1,0 +1,14 @@
+# Dependabot opens a pull request when a dependency has a new version.
+# Cloudflare builds a preview for each pull request: check it, then merge.
+# Security fixes arrive on their own as soon as a vulnerability is published
+# (enable "Dependabot security updates" in the repo's Code security settings).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      astro:                      # Astro and its add-ons update together in one PR
+        patterns: ["astro", "@astrojs/*"]
+    open-pull-requests-limit: 5
