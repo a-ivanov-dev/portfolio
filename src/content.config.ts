@@ -38,11 +38,12 @@ const site = defineCollection({
 const credentials = defineCollection({
   loader: md('credentials'),
   schema: z.object({
-    name: z.string(),
-    domain: z.string(),
-    target: z.string(),
+    // coerce: a year typed as 2023 (number) is accepted as text, so a note never silently drops out
+    name: z.coerce.string(),
+    domain: z.coerce.string(),
+    target: z.coerce.string(),
     status,
-    order: z.number(),                      // position in the table, 1 = first
+    order: z.coerce.number(),               // position in the table, 1 = first
   }),
 });
 

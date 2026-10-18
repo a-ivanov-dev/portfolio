@@ -11,7 +11,7 @@ git add -A
 if git diff --cached --quiet; then echo "Nothing changed. Nothing to publish."; exit 0; fi
 
 echo "== Changes to publish =="
-git diff --cached --stat
+git --no-pager diff --cached --stat
 echo
 
 # Private data check: internal IP addresses and MAC addresses in the new text.
