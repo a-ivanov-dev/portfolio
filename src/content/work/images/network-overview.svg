@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" width="960" height="680" role="img" aria-labelledby="t d">
+  <title id="t">Home lab network overview</title>
+  <desc id="d">Internet through the ISP router to an OPNsense firewall, then an Aruba switch that connects five zones by trust level (Management, Infrastructure, Home, Guest, IoT) and a planned enterprise lab. A Wi-Fi access point serves Home, Guest and IoT. Admin access goes from the laptop through the jump box. Logs and Suricata alerts go to Wazuh.</desc>
+  <defs>
+    <marker id="arrOrange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#BC4C00"/></marker>
+    <marker id="arrBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0969DA"/></marker>
+    <style>
+      text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; fill: #1F2328; }
+      .h { font-size: 13px; font-weight: 600; }
+      .s { font-size: 11px; fill: #59636E; }
+      .n { font-size: 12px; font-weight: 600; }
+      .box { fill: #FFFFFF; stroke-width: 1.5; }
+      .link { stroke: #59636E; stroke-width: 1.5; fill: none; }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="958" height="678" rx="16" fill="#F6F8FA" stroke="#D1D9E0"/>
+  <text x="28" y="38" style="font-size:18px;font-weight:700">Home lab: network overview</text>
+  <text x="28" y="58" class="s">Zones by trust level. The firewall is the only router between zones.</text>
+
+  <!-- Internet -> ISP -> firewall -> switch -->
+  <ellipse cx="480" cy="96" rx="70" ry="22" class="box" stroke="#59636E"/>
+  <text x="480" y="100" text-anchor="middle" class="n">Internet</text>
+  <line x1="480" y1="118" x2="480" y2="140" class="link"/>
+
+  <rect x="365" y="140" width="230" height="40" rx="8" class="box" stroke="#59636E"/>
+  <text x="480" y="158" text-anchor="middle" class="n">ISP router</text>
+  <text x="480" y="173" text-anchor="middle" class="s">double NAT for now</text>
+  <line x1="480" y1="180" x2="480" y2="200" class="link"/>
+
+  <rect x="270" y="200" width="420" height="56" rx="8" class="box" stroke="#CF222E"/>
+  <text x="480" y="222" text-anchor="middle" class="h">Firewall: OPNsense on a Protectli</text>
+  <text x="480" y="242" text-anchor="middle" class="s">default deny in and out · Suricata IDS · MFA on admin</text>
+  <line x1="480" y1="256" x2="480" y2="278" class="link"/>
+  <text x="488" y="271" class="s">trunk</text>
+
+  <rect x="270" y="278" width="420" height="50" rx="8" class="box" stroke="#0969DA"/>
+  <text x="480" y="298" text-anchor="middle" class="h">Switch: Aruba CX 6000 (layer 2)</text>
+  <text x="480" y="316" text-anchor="middle" class="s">pruned trunks · DHCP snooping · BPDU guard · blackhole native VLAN</text>
+
+  <!-- Wi-Fi access point -->
+  <line x1="690" y1="303" x2="716" y2="303" class="link"/>
+  <rect x="716" y="284" width="220" height="40" rx="8" class="box" stroke="#59636E"/>
+  <text x="826" y="301" text-anchor="middle" class="n">Wi-Fi AP: TP-Link EAP670</text>
+  <text x="826" y="316" text-anchor="middle" class="s">managed locally · Home, Guest, IoT</text>
+
+  <!-- bus to zones -->
+  <line x1="480" y1="328" x2="480" y2="360" class="link"/>
+  <line x1="100" y1="360" x2="708" y2="360" class="link"/>
+  <line x1="708" y1="360" x2="860" y2="360" class="link" stroke-dasharray="5 4"/>
+  <line x1="100" y1="360" x2="100" y2="390" class="link"/>
+  <line x1="252" y1="360" x2="252" y2="390" class="link"/>
+  <line x1="404" y1="360" x2="404" y2="390" class="link"/>
+  <line x1="556" y1="360" x2="556" y2="390" class="link"/>
+  <line x1="708" y1="360" x2="708" y2="390" class="link"/>
+  <line x1="860" y1="360" x2="860" y2="390" class="link" stroke-dasharray="5 4"/>
+
+  <!-- zones -->
+  <rect x="30" y="390" width="140" height="200" rx="8" class="box" stroke="#CF222E"/>
+  <text x="100" y="412" text-anchor="middle" class="h">Management</text>
+  <text x="42" y="436" class="s">Jump box (Fedora)</text>
+  <text x="42" y="454" class="s">Firewall, switch and</text>
+  <text x="42" y="469" class="s">Proxmox admin pages</text>
+  <text x="42" y="487" class="s">Dell out-of-band mgmt</text>
+  <text x="42" y="574" class="s" style="fill:#CF222E">Reach: updates only</text>
+
+  <rect x="182" y="390" width="140" height="200" rx="8" class="box" stroke="#BC4C00"/>
+  <text x="252" y="412" text-anchor="middle" class="h">Infrastructure</text>
+  <text x="194" y="436" class="s">AdGuard Home (DNS)</text>
+  <text x="194" y="454" class="s">Wazuh SIEM</text>
+  <text x="194" y="472" class="s">Dashboards</text>
+  <text x="194" y="496" class="s">VMs on the Ryzen</text>
+  <text x="194" y="511" class="s">Proxmox host</text>
+  <text x="194" y="574" class="s" style="fill:#BC4C00">Reach: updates + web</text>
+
+  <rect x="334" y="390" width="140" height="200" rx="8" class="box" stroke="#1A7F37"/>
+  <text x="404" y="412" text-anchor="middle" class="h">Home</text>
+  <text x="346" y="436" class="s">Personal devices</text>
+  <text x="346" y="454" class="s">Admin laptop</text>
+  <text x="346" y="472" class="s">Wired + Wi-Fi</text>
+  <text x="346" y="574" class="s" style="fill:#1A7F37">Reach: internet</text>
+
+  <rect x="486" y="390" width="140" height="200" rx="8" class="box" stroke="#6E7781"/>
+  <text x="556" y="412" text-anchor="middle" class="h">Guest</text>
+  <text x="498" y="436" class="s">Visitors (Wi-Fi)</text>
+  <text x="498" y="454" class="s">Isolated from all</text>
+  <text x="498" y="469" class="s">internal zones</text>
+  <text x="498" y="574" class="s">Reach: internet</text>
+
+  <rect x="638" y="390" width="140" height="200" rx="8" class="box" stroke="#9A6700"/>
+  <text x="708" y="412" text-anchor="middle" class="h">IoT</text>
+  <text x="650" y="436" class="s">Smart devices (Wi-Fi)</text>
+  <text x="650" y="454" class="s">Isolated from all</text>
+  <text x="650" y="469" class="s">internal zones</text>
+  <text x="650" y="574" class="s" style="fill:#9A6700">Reach: web, DNS, time</text>
+
+  <rect x="790" y="390" width="140" height="200" rx="8" class="box" stroke="#0969DA" stroke-dasharray="6 4"/>
+  <text x="860" y="412" text-anchor="middle" class="h">Enterprise lab</text>
+  <text x="802" y="436" class="s">Dell R730 (Proxmox)</text>
+  <text x="802" y="454" class="s">Active Directory</text>
+  <text x="802" y="472" class="s">Routing (Cisco 3750)</text>
+  <text x="802" y="490" class="s">Attack and defend</text>
+  <text x="802" y="574" class="s" style="fill:#0969DA">Planned</text>
+
+  <!-- log flow: firewall (Suricata + agent) and agents -> Wazuh -->
+  <path d="M270,232 L176,232 L176,450 L184,450" fill="none" stroke="#0969DA" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrBlue)"/>
+  <text x="40" y="196" class="s" style="fill:#0969DA">Suricata alerts and</text>
+  <text x="40" y="211" class="s" style="fill:#0969DA">logs from 7 agents → Wazuh</text>
+
+  <!-- admin path: laptop -> jump box -->
+  <path d="M404,590 L404,612 L100,612 L100,594" fill="none" stroke="#BC4C00" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrOrange)"/>
+  <text x="252" y="630" text-anchor="middle" class="s" style="fill:#BC4C00">Admin path: laptop → jump box → admin pages</text>
+
+  <!-- legend -->
+  <line x1="440" y1="646" x2="470" y2="646" class="link"/>
+  <text x="476" y="650" class="s">network link</text>
+  <rect x="560" y="639" width="22" height="14" rx="3" fill="none" stroke="#0969DA" stroke-dasharray="4 3"/>
+  <text x="588" y="650" class="s">planned</text>
+  <text x="650" y="650" class="s">No IPs, VLAN numbers or hostnames on purpose.</text>
+</svg>

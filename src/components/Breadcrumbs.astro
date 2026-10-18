@@ -1,0 +1,27 @@
+---
+// "HOME / WORK / ENG–02" path above a page title. Every step except the last is a link.
+// Also emits schema.org BreadcrumbList so search engines can show the path in results.
+interface Crumb { label: string; href?: string; }
+interface Props { items: Crumb[]; }
+const items: Crumb[] = [{ label: 'Home', href: '/' }, ...Astro.props.items];
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.label,
+    ...(c.href ? { item: new URL(c.href, Astro.site).href } : {}),
+  })),
+};
+---
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    {items.map((c, i) =>
+      i < items.length - 1 && c.href
+        ? <li><a href={c.href}>{c.label}</a></li>
+        : <li aria-current="page">{c.label}</li>
+    )}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(ld).replace(/</g, '\\u003c')}></script>

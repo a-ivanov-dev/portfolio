@@ -1,11 +1,25 @@
 ---
-// Shared frame for writeups, blog posts, topic pages and 404.
+// Shared frame for writeups, blog posts, pages, topic pages and 404.
+// "back" = where the back button leads (defaults to the home page).
+import { getMenuPages } from '../lib/content';
+
+interface Props { back?: { href: string; label: string }; }
+const { back = { href: '/', label: 'Home' } } = Astro.props;
+const menu = await getMenuPages();
 ---
-<nav class="wnav">
-  <a class="back" href="/#work">&larr; Home</a>
-  <span class="sp"></span>
+<nav class="wnav" aria-label="Site">
+  <a class="wback" href={back.href}><span class="wback__arrow" aria-hidden="true">&larr;</span> {back.label}</a>
+  <div class="wnav__links">
+    <a class="back" href="/">Home</a>
+    <a class="back" href="/work/">Work</a>
+    <a class="back" href="/blog/">Blog</a>
+    <a class="back" href="/topics/">Topics</a>
+    {menu.map((p) => <a class="back" href={`/${p.id}/`}>{p.data.title}</a>)}
+  </div>
   <button class="tog" type="button" aria-label="Switch colour theme">Theme &mdash; Auto</button>
 </nav>
-<article class="doc">
-  <slot />
-</article>
+<main>
+  <article class="doc">
+    <slot />
+  </article>
+</main>

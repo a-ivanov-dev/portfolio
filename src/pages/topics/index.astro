@@ -1,0 +1,17 @@
+---
+// Overview of all topics: /topics/
+import Base from '../../layouts/Base.astro';
+import DocPage from '../../components/DocPage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { getUsedTopics } from '../../lib/content';
+const topics = await getUsedTopics();
+---
+<Base title="Topics" description="Browse projects and posts by topic.">
+  <DocPage>
+    <Breadcrumbs items={[{ label: 'Topics' }]} />
+    <h1 class="doc__title">Topics</h1>
+    {topics.length === 0
+      ? <p class="empty">No topics yet.</p>
+      : <nav class="topiclist" aria-label="Topics">{topics.map((t) => <a class="rail__link" href={`/topics/${t.slug}/`}>{t.name}<span class="topiclist__n">{t.count}</span></a>)}</nav>}
+  </DocPage>
+</Base>

@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { STATUS } from '../config';
 import { hasWriteup } from '../lib/content';
+import TopicLinks from './TopicLinks.astro';
 
 interface Props { entry: CollectionEntry<'work'>; }
 const { entry } = Astro.props;
@@ -9,13 +10,15 @@ const d = entry.data;
 const st = STATUS[d.status as keyof typeof STATUS];
 const writeup = hasWriteup(entry);
 ---
-<article class="eng">
+<!-- When the writeup has its own page, the title link stretches over the whole card (see .card-link in global.css). -->
+<article class={writeup ? 'eng eng--link' : 'eng'}>
   <div class="eng__head">
     <span class="eng__id">{d.code.replace('-', '–')}</span>
-    <h3 class="eng__title">{d.title}</h3>
+    <h3 class="eng__title">{writeup ? <a class="card-link" href={`/work/${entry.id}/`}>{d.title}</a> : d.title}</h3>
     <span class={`chip chip--${st.chip}`}>{st.label}</span>
   </div>
   <p class="eng__sum">{d.summary}</p>
+  <TopicLinks topics={d.topics} />
   {d.tags.length > 0 && <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>}
   {(writeup || d.links.length > 0) && (
     <div class="acts">

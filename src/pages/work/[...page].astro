@@ -1,0 +1,29 @@
+---
+// Full list of writeups, paginated: /work/, /work/2/, ...
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import DocPage from '../../components/DocPage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import TopicBar from '../../components/TopicBar.astro';
+import Pager from '../../components/Pager.astro';
+import { getSite, getWork } from '../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const size = (await getSite()).data.listPageSize;
+  const work = await getWork();
+  return paginate(work, { pageSize: size, props: { all: work } });
+}) satisfies GetStaticPaths;
+
+const { page, all } = Astro.props;
+---
+<Base title={page.currentPage > 1 ? `Work — page ${page.currentPage}` : 'Work'} description="All projects and writeups.">
+  <DocPage>
+    <Breadcrumbs items={page.currentPage > 1 ? [{ label: 'Work', href: '/work/' }, { label: `Page ${page.currentPage}` }] : [{ label: 'Work' }]} />
+    <p class="doc__count">{page.total} {page.total === 1 ? 'item' : 'items'}</p>
+    <h1 class="doc__title">Work</h1>
+    <TopicBar items={all} />
+    {page.data.map((entry) => <WorkCard entry={entry} />)}
+    <Pager page={page} />
+  </DocPage>
+</Base>

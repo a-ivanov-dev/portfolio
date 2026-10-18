@@ -1,0 +1,13 @@
+---
+// Topic chips that link to the topic pages: static "filters" for a list.
+import { slugify } from '../lib/content';
+interface Props { items: { data: { topics: string[] } }[]; }
+const names = Astro.props.items.flatMap((e) => e.data.topics);
+const topics = [...new Map(names.map((n) => [slugify(n), { name: n, slug: slugify(n) }])).values()];
+---
+{topics.length > 0 && (
+  <nav class="tags topicbar" aria-label="Filter by topic">
+    {topics.map((t) => <a class="tag" href={`/topics/${t.slug}/`}>{t.name}</a>)}
+    <a class="topicbar__all" href="/topics/">All topics &rarr;</a>
+  </nav>
+)}

@@ -1,24 +1,25 @@
 ---
 import Base from '../../layouts/Base.astro';
 import DocPage from '../../components/DocPage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import WorkCard from '../../components/WorkCard.astro';
 import PostItem from '../../components/PostItem.astro';
-import { TOPICS, type Topic } from '../../config';
-import { getWork, getPosts, getUsedTopics } from '../../lib/content';
+import { getWork, getPosts, getUsedTopics, slugify } from '../../lib/content';
 
 // One page per topic that has content, e.g. /topics/detection/
 export async function getStaticPaths() {
-  return (await getUsedTopics()).map((topic) => ({ params: { topic } }));
+  return (await getUsedTopics()).map((t) => ({ params: { topic: t.slug }, props: { name: t.name } }));
 }
 
-const topic = Astro.params.topic as Topic;
-const name = TOPICS[topic];
-const work = (await getWork()).filter((e) => e.data.topics.includes(topic));
-const posts = (await getPosts()).filter((e) => e.data.topics.includes(topic));
+const { topic } = Astro.params;
+const { name } = Astro.props;
+const has = (e: { data: { topics: string[] } }) => e.data.topics.some((t) => slugify(t) === topic);
+const work = (await getWork()).filter(has);
+const posts = (await getPosts()).filter(has);
 ---
 <Base title={name} description={`Projects and posts about ${name}.`}>
-  <DocPage>
-    <p class="doc__eyebrow">Topic</p>
+  <DocPage back={{ href: '/topics/', label: 'All topics' }}>
+    <Breadcrumbs items={[{ label: 'Topics', href: '/topics/' }, { label: name }]} />
     <h1 class="doc__title">{name}</h1>
     {work.length > 0 && <><h2>Work</h2>{work.map((entry) => <WorkCard entry={entry} />)}</>}
     {posts.length > 0 && <><h2>Blog</h2>{posts.map((entry) => <PostItem entry={entry} />)}</>}

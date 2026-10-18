@@ -1,0 +1,26 @@
+---
+// Free-standing pages: src/content/pages/about.md becomes /about/
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import DocPage from '../components/DocPage.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { getPages } from '../lib/content';
+
+export async function getStaticPaths() {
+  return (await getPages()).map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+---
+<Base title={d.title} description={d.description} image={d.cover}>
+  <DocPage>
+    <Breadcrumbs items={[{ label: d.title }]} />
+    <h1 class="doc__title">{d.title}</h1>
+    {d.cover && <Image src={d.cover} alt={d.coverAlt ?? ''} class="doc__cover" />}
+
+    <Content />
+  </DocPage>
+</Base>

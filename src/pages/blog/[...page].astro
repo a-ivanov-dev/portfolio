@@ -1,0 +1,29 @@
+---
+// Full list of blog posts, paginated: /blog/, /blog/2/, ...
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import DocPage from '../../components/DocPage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PostItem from '../../components/PostItem.astro';
+import TopicBar from '../../components/TopicBar.astro';
+import Pager from '../../components/Pager.astro';
+import { getSite, getPosts } from '../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const size = (await getSite()).data.listPageSize;
+  const posts = await getPosts();
+  return paginate(posts, { pageSize: size, props: { all: posts } });
+}) satisfies GetStaticPaths;
+
+const { page, all } = Astro.props;
+---
+<Base title={page.currentPage > 1 ? `Blog — page ${page.currentPage}` : 'Blog'} description="All blog posts.">
+  <DocPage>
+    <Breadcrumbs items={page.currentPage > 1 ? [{ label: 'Blog', href: '/blog/' }, { label: `Page ${page.currentPage}` }] : [{ label: 'Blog' }]} />
+    <p class="doc__count">{page.total} {page.total === 1 ? 'post' : 'posts'}</p>
+    <h1 class="doc__title">Blog</h1>
+    <TopicBar items={all} />
+    {page.total === 0 ? <p class="empty">First post coming soon.</p> : page.data.map((entry) => <PostItem entry={entry} />)}
+    <Pager page={page} />
+  </DocPage>
+</Base>

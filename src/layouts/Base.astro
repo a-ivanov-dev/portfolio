@@ -1,11 +1,17 @@
 ---
 import '../styles/global.css';
-import { SITE } from '../config';
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import { getSite } from '../lib/content';
 
-interface Props { title?: string; description?: string; }
-const { title, description = SITE.description } = Astro.props;
-const fullTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — Security Operations & Cloud Security`;
+interface Props { title?: string; description?: string; image?: ImageMetadata; }
+const s = (await getSite()).data;
+const { title, description = s.description, image = s.shareImage } = Astro.props;
+const fullTitle = title ? `${title} — ${s.name}` : s.siteTitle;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Link-preview picture (LinkedIn, Slack...): resized to the standard 1200 px width.
+const og = image ? await getImage({ src: image, width: 1200, format: 'jpeg' }) : undefined;
+const ogUrl = og ? new URL(og.src, Astro.site).href : undefined;
 ---
 <!doctype html>
 <html lang="en">
@@ -19,10 +25,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <meta property="og:title" content={fullTitle}>
   <meta property="og:description" content={description}>
   <meta property="og:url" content={canonical}>
-  <meta name="twitter:card" content="summary">
+  {ogUrl && <meta property="og:image" content={ogUrl}>}
+  <meta name="twitter:card" content={ogUrl ? 'summary_large_image' : 'summary'}>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="sitemap" href="/sitemap-index.xml">
-  <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml">
+  <link rel="alternate" type="application/rss+xml" title={s.name} href="/rss.xml">
   <!-- External scripts only, so the CSP can be script-src 'self' with no hashes to maintain. -->
   <script is:inline src="/scripts/theme-init.js"></script>
   <slot name="head" />

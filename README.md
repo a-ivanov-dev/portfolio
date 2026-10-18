@@ -2,22 +2,32 @@
 
 Personal site, built with [Astro](https://astro.build) and deployed by Cloudflare Pages on every push to `main`.
 
-## Where things live
+## Editing content (Obsidian)
 
-| What | File |
+Open `src/content` as an Obsidian vault (Open folder as vault). Everything you edit day to day is a note there:
+
+| What | Note |
 |---|---|
-| Name, links, role line, contact text, credentials table | `src/config.ts` |
-| Summary paragraphs | `src/data/summary.md` |
-| Projects / writeups (one file each) | `src/content/work/*.md` |
-| Blog posts (one file each) | `src/content/blog/*.md` |
-| Templates to copy | `src/content/work/_template.md`, `src/content/blog/_template.md` |
-| Images for writeups | `public/images/` |
-| Design (colours, fonts, layout) | `src/styles/global.css` |
-| Star sky + theme toggle | `public/scripts/` |
-| Security headers | `public/_headers` |
+| Name, links, role line, contact text, link-preview picture | `site/home.md` (Properties) |
+| Summary on the home page | `site/home.md` (text of the note) |
+| Credentials table | `credentials/*.md`, one note per cert |
+| Projects / writeups | `work/*.md` |
+| Blog posts | `blog/*.md` |
+| Extra pages (`about.md` -> `/about/`) | `pages/*.md` |
+| Templates (Obsidian core Templates plugin) | `_templates/` |
 
-A project with an empty body shows only as a card. Text below its frontmatter becomes a writeup page at `/work/<file-name>/`.
-`draft: true` hides a file on the live site but shows it in the local preview.
+Pictures pasted into a note are saved in an `images` folder next to it and optimised by Astro.
+A project with an empty body shows only as a card; text below its properties becomes a page at `/work/<file-name>/`.
+`draft: true` hides a note on the live site but shows it in the local preview.
+
+Topics (star labels) and tags are free text typed in each note. Code-level settings (rarely changed): status values in `src/config.ts`, design in `src/styles/global.css`, star sky and theme toggle in `public/scripts/`, security headers in `public/_headers`.
+
+## Preview and publish
+
+```
+./scripts/preview.sh    # live site at http://localhost:4321 while you edit (Ctrl+C to stop)
+./scripts/publish.sh    # privacy check + offline test build + commit + push
+```
 
 ## Local preview (Podman, rootless; Node is never installed on the host)
 

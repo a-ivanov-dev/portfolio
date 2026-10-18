@@ -1,0 +1,13 @@
+---
+// "Newer / Older" links under a paginated list. Hidden when everything fits on one page.
+import type { Page } from 'astro';
+interface Props { page: Page<unknown>; }
+const { page } = Astro.props;
+---
+{page.lastPage > 1 && (
+  <nav class="pager" aria-label="Pages">
+    {page.url.prev ? <a class="act" href={page.url.prev}>&larr; Newer</a> : <span></span>}
+    <span class="pager__n">Page {page.currentPage} of {page.lastPage}</span>
+    {page.url.next ? <a class="act" href={page.url.next}>Older &rarr;</a> : <span></span>}
+  </nav>
+)}

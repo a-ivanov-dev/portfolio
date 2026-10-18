@@ -1,29 +1,43 @@
 ---
 import { render } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import DocPage from '../../components/DocPage.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import TopicLinks from '../../components/TopicLinks.astro';
+import PrevNext from '../../components/PrevNext.astro';
 import { getPosts, ym } from '../../lib/content';
 
 export async function getStaticPaths() {
-  return (await getPosts()).map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const posts = await getPosts();                        // newest first
+  const link = (e?: (typeof posts)[number]) => (e ? { href: `/blog/${e.id}/`, title: e.data.title } : undefined);
+  return posts.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, newer: link(posts[i - 1]), older: link(posts[i + 1]) },
+  }));
 }
 
-const { entry } = Astro.props;
+const { entry, newer, older } = Astro.props;
 const d = entry.data;
 const { Content } = await render(entry);
 ---
-<Base title={d.title} description={d.summary}>
-  <DocPage>
-    <p class="doc__eyebrow">Blog</p>
+<Base title={d.title} description={d.summary} image={d.cover}>
+  <DocPage back={{ href: '/blog/', label: 'All posts' }}>
+    <Breadcrumbs items={[{ label: 'Blog', href: '/blog/' }, { label: 'Post' }]} />
     <h1 class="doc__title">{d.title}</h1>
     <div class="doc__meta"><span>Date <b>{ym(d.date, '–')}</b></span></div>
+    <TopicLinks topics={d.topics} />
     {d.tags.length > 0 && <div class="tags">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>}
+
+    {d.cover && <Image src={d.cover} alt={d.coverAlt ?? ''} class="doc__cover" />}
 
     <Content />
 
+    <PrevNext newer={newer} older={older} />
+
     <div class="docfoot">
       <span class="sp"></span>
-      <a class="back" href="/#blog">All posts &rarr;</a>
+      <a class="back" href="/blog/">All posts &rarr;</a>
     </div>
   </DocPage>
 </Base>

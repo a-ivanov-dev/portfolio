@@ -1,9 +1,9 @@
 import rss from '@astrojs/rss';
-import { SITE } from '../config';
-import { getWork, getPosts, hasWriteup } from '../lib/content';
+import { getSite, getWork, getPosts, hasWriteup } from '../lib/content';
 
 // Feed of blog posts and finished writeups, newest first.
 export async function GET(context) {
+  const SITE = (await getSite()).data;
   const posts = (await getPosts()).map((p) => ({
     title: p.data.title, pubDate: p.data.date, description: p.data.summary, link: `/blog/${p.id}/`,
   }));

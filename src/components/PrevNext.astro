@@ -1,0 +1,15 @@
+---
+// "← Newer / Older →" links at the bottom of a writeup or post, in the same order as the lists.
+interface Link { href: string; title: string; }
+interface Props { newer?: Link; older?: Link; }
+const { newer, older } = Astro.props;
+---
+{(newer || older) && (
+  <nav class="prevnext" aria-label="More">
+    {newer
+      ? <a class="prevnext__a" href={newer.href}><span class="prevnext__l">&larr; Newer</span><span class="prevnext__t">{newer.title}</span></a>
+      : <span></span>}
+    {older &&
+      <a class="prevnext__a prevnext__a--older" href={older.href}><span class="prevnext__l">Older &rarr;</span><span class="prevnext__t">{older.title}</span></a>}
+  </nav>
+)}

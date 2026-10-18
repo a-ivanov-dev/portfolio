@@ -38,7 +38,7 @@
     --border-strong: #B7BFC7;
     --text:          #1F2328;
     --text-2:        #59636E;
-    --text-3:        #818B98;
+    --text-3:        #656D76;   /* 5.3:1 on white, WCAG AA */
     --accent:        #0969DA;
     --accent-dim:    rgba(9, 105, 218, 0.10);
     --accent-rgb:    9, 105, 218;
@@ -71,7 +71,7 @@
       --hero-ink:   255, 255, 255;
       --hero-star:  #FFFFFF;
       --hero-text:  #C9D1D9;
-      --hero-dim:   #6E7681;
+      --hero-dim:   #8B949E;
       --hero-hair:  #23282D;
 
       --canvas:        #0D1117;
@@ -80,7 +80,7 @@
       --border-strong: #444C56;
       --text:          #E6EDF3;
       --text-2:        #9198A1;
-      --text-3:        #6E7681;
+      --text-3:        #8B949E;   /* 6.2:1 on dark canvas, WCAG AA */
       --accent:        #58A6FF;
       --accent-dim:    rgba(88, 166, 255, 0.14);
       --accent-rgb:    88, 166, 255;
@@ -107,7 +107,7 @@
     --border-strong: #B7BFC7;
     --text:          #1F2328;
     --text-2:        #59636E;
-    --text-3:        #818B98;
+    --text-3:        #656D76;   /* 5.3:1 on white, WCAG AA */
     --accent:        #0969DA;
     --accent-dim:    rgba(9, 105, 218, 0.10);
     --accent-rgb:    9, 105, 218;
@@ -124,7 +124,7 @@
     --hero-ink:   255, 255, 255;
     --hero-star:  #FFFFFF;
     --hero-text:  #C9D1D9;
-    --hero-dim:   #6E7681;
+    --hero-dim:   #8B949E;
     --hero-hair:  #23282D;
 
     --canvas:        #0D1117;
@@ -133,7 +133,7 @@
     --border-strong: #444C56;
     --text:          #E6EDF3;
     --text-2:        #9198A1;
-    --text-3:        #6E7681;
+    --text-3:        #8B949E;   /* 6.2:1 on dark canvas, WCAG AA */
     --accent:        #58A6FF;
     --accent-dim:    rgba(88, 166, 255, 0.14);
     --accent-rgb:    88, 166, 255;
@@ -330,7 +330,7 @@
     border-radius: 6px;
     transition: background 180ms ease, border-color 180ms ease;
   }
-  .eng:hover { background: var(--surface); border-color: var(--border); }
+  @media (hover: hover) { .eng--link:hover { background: var(--surface); border-color: var(--border); } }
   .eng__head { display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap; }
   .eng__id { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.12em; color: var(--accent); }
   .eng__title { font-size: var(--lg); font-weight: 600; letter-spacing: -0.015em; margin: 0; flex: 1 1 16rem; }
@@ -516,7 +516,7 @@
     .post { grid-template-columns: 1fr; gap: 0.3rem; }
     /* engagement card highlights only when chosen (pressed), like desktop hover */
     .eng { padding: 1.25rem; }
-    .eng:active { background: var(--surface); border-color: var(--accent); }
+    .eng--link:active { background: var(--surface); border-color: var(--accent); }
 
     /* certs table shrinks to fit the screen — no horizontal scroll */
     table.trk { min-width: 0; width: 100%; font-size: 0.6rem; table-layout: fixed; }
@@ -557,3 +557,115 @@
 /* cards reused inside doc pages (topic pages) keep their own spacing */
 .doc .eng__title, .doc .post__t { margin: 0; }
 .doc .eng { margin: 0 -1.5rem; }
+
+/* pictures keep their proportions when scaled down */
+img { height: auto; }
+.doc .doc__cover { width: 100%; margin: 1.5rem 0 0.5rem; }
+
+/* "All work / All posts" link under the home sections */
+.more { margin: 1.25rem 0 0; padding: 0 1.5rem; }
+
+/* clickable section headings on the home page */
+.sec__link { color: inherit; text-decoration: none; }
+.sec__link:hover { color: var(--accent); }
+/* topic filter chips on /work/ and /blog/ */
+.topicbar { margin: 0 0 1.5rem; }
+.topicbar .tag { text-decoration: none; }
+.topicbar .tag:hover { text-decoration: underline; }
+/* Newer / Older links under paginated lists */
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.pager__n { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+/* subpage navigation wraps on small screens instead of overflowing */
+.wnav { flex-wrap: wrap; row-gap: 0.5rem; }
+
+/* "Topics: Detection · SIEM" line on cards and pages (plain links, unlike the blue tool chips) */
+.topics { margin: 0; font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.06em; color: var(--text-3); }
+.topics a { color: var(--text-2); text-decoration: none; }
+.topics a:hover { color: var(--accent); text-decoration: underline; }
+.topics__l { margin-right: 0.4rem; text-transform: uppercase; letter-spacing: 0.12em; }
+.post .topics { margin-top: 0.35rem; }
+.doc .topics { margin: 0 0 0.75rem; }
+.topicbar__all { font-family: var(--mono); font-size: var(--micro); color: var(--text-3); align-self: center; }
+/* /topics/ overview: same look as the home page side menu (.rail__link) */
+.topiclist { display: grid; gap: 0.85rem; margin-top: 1.5rem; }
+.topiclist .rail__link { font-size: var(--xs); padding: 0.2rem 0; }
+.topiclist__n { color: var(--text-3); opacity: 0.7; margin-left: 0.15rem; }
+/* phones have no hover: grow the line while the link is pressed */
+.rail__link:active { color: var(--text); }
+.rail__link:active::before { width: 2.75rem; background: var(--accent); }
+.doc__eyebrow a { color: inherit; text-decoration: none; }
+
+/* Whole card clickable (desktop click + phone tap): the title link's ::after covers the card.
+   Links inside the card (topics, buttons) sit above it and stay separately clickable. */
+.eng--link { position: relative; -webkit-tap-highlight-color: transparent; }
+.post.eng--link { border-radius: 6px; }
+.card-link { color: inherit; text-decoration: none; }
+.card-link::after { content: ""; position: absolute; inset: 0; border-radius: 6px; }
+.eng--link .topics a, .eng--link .acts a { position: relative; z-index: 1; }
+@media (hover: hover) { .eng--link:hover .card-link { color: var(--accent); } }
+.eng--link:active .card-link { color: var(--accent); }
+.card-link:focus-visible { outline: none; }
+.card-link:focus-visible::after { outline: 1px solid var(--accent); outline-offset: 2px; }
+
+/* ---- subpage header: back pill (left), site links, theme toggle (right) ---- */
+.wback {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--accent); text-decoration: none;
+  border: 1px solid var(--accent); border-radius: 999px; padding: 0.4rem 0.85rem;
+  transition: background 180ms ease;
+}
+.wback__arrow { transition: transform 180ms ease; }
+@media (hover: hover) {
+  .wback:hover { background: var(--accent-dim); }
+  .wback:hover .wback__arrow { transform: translateX(-3px); }
+}
+.wback:active { background: var(--accent-dim); }
+.wnav__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; align-items: center; }
+.wnav .tog { margin-left: auto; }
+@media (max-width: 760px) {
+  /* phone: row 1 = back pill + theme toggle, row 2 = site links */
+  .wnav__links { order: 3; width: 100%; }
+}
+
+/* ---- focus areas under the name ---- */
+.rail__role--stack { display: grid; gap: 0.2rem; }
+.rail__role--stack span::before { content: "·"; margin-right: 0.5rem; opacity: 0.6; }
+
+/* ---- contact links: one line on desktop, one per line on phones ---- */
+.contact { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; }
+.contact li::before { content: "·"; margin-right: 0.5rem; color: var(--text-3); }
+@media (max-width: 760px) {
+  .contact { flex-direction: column; gap: 0.6rem; }
+}
+
+/* ---- breadcrumbs: HOME / WORK / ENG–02 ---- */
+.crumbs ol { list-style: none; margin: 0 0 0.9rem; padding: 0; display: flex; flex-wrap: wrap; align-items: center; row-gap: 0.3rem; }
+.crumbs li { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-3); }
+.crumbs li + li::before { content: "/"; margin: 0 0.6rem; color: var(--border-strong); }
+.crumbs a { color: var(--accent); text-decoration: none; }
+@media (hover: hover) { .crumbs a:hover { text-decoration: underline; text-underline-offset: 4px; } }
+.crumbs a:active { color: var(--text); }
+.crumbs [aria-current="page"] { color: var(--text-2); }
+/* item count under the Work / Blog list title */
+.doc__count { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin: -0.6rem 0 1.25rem !important; }
+
+/* ---- "← Newer / Older →" at the bottom of writeups and posts ---- */
+.prevnext { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 3rem; }
+.prevnext__a {
+  display: grid; gap: 0.35rem; padding: 1rem 1.15rem; text-decoration: none;
+  border: 1px solid var(--border); border-radius: 6px; transition: border-color 180ms ease, background 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.prevnext__a--older { text-align: right; grid-column: 2; }
+.prevnext__l { font-family: var(--mono); font-size: var(--micro); letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent); }
+.prevnext__t { color: var(--text); font-weight: 600; font-size: var(--sm); line-height: 1.4; }
+@media (hover: hover) { .prevnext__a:hover { border-color: var(--accent); background: var(--surface); } }
+.prevnext__a:active { border-color: var(--accent); background: var(--surface); }
+@media (max-width: 760px) {
+  /* phone: stacked, full width */
+  .prevnext { grid-template-columns: 1fr; }
+  .prevnext > span:empty { display: none; }
+  .prevnext__a--older { grid-column: auto; }
+}
+.doc .prevnext + .docfoot { margin-top: 2rem; }
